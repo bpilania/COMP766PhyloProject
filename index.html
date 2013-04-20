@@ -1,0 +1,502 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+            }
+        </style>
+    </head>
+    <body>
+        <form name="myForm" method="POST">
+            Zoom Level: <input type="range" id="zoom"  min="0" max="3" value="0">
+            <input type="hidden" id="myField" value="" />
+            <div id="container"></div>
+            <script src="kinetic-v4.4.0-beta.js"></script>
+            <script src="jquery.min.js"></script>
+
+            <script>
+                var playCount;
+
+                function getQueryVariable(variable) {
+                    var query = window.location.search.substring(1);
+                    var vars = query.split("&");
+                    for (var i = 0; i < vars.length; i++) {
+                        var pair = vars[i].split("=");
+                        if (pair[0] === variable) {
+                            return pair[1];
+                        }
+                    }
+                }
+
+                var tooltipLayer = new Kinetic.Layer();
+
+
+
+                var tooltip = new Kinetic.Label({
+                    opacity: 0.75,
+                    visible: false,
+                    listening: false,
+                    text: {
+                        text: '',
+                        fontFamily: 'Calibri',
+                        fontSize: 18,
+                        padding: 5,
+                        fill: 'white'
+                    },
+                    rect: {
+                        fill: 'black',
+                        pointerDirection: 'down',
+                        pointerWidth: 10,
+                        pointerHeight: 10,
+                        lineJoin: 'round',
+                        shadowColor: 'black',
+                        shadowBlur: 10,
+                        shadowOffset: 10,
+                        shadowOpacity: 0.2
+                    }
+                });
+
+                tooltipLayer.add(tooltip);
+
+                var stage = new Kinetic.Stage({
+                    container: 'container',
+                    width: 1300,
+                    height: 3500
+                });
+                var layer = new Kinetic.Layer();
+                var group = new Kinetic.Group({
+                    draggable: true
+                });
+                var node;
+                function addCNode(obj, group) {
+                    node = new Kinetic.Circle({
+                        x: obj.x,
+                        y: obj.y,
+                        radius: 5,
+                        fill: obj.color,
+                        id: obj.id,
+                        playCount: obj.playCount
+                    });
+                    node.on('click', function(evt) {
+                        //alert('Node id is: '+obj.id);
+                        var node = evt.targetNode;
+                        // update tooltip
+                        var mousePos = node.getStage().getMousePosition();
+                        tooltip.setPosition(mousePos.x, mousePos.y - 5);
+                        tooltip.getText().setText("Genome ID: " + node.getId() + ", Play Count: " + obj.playCount);
+                        tooltip.show();
+
+                        tooltipLayer.draw();
+                    });
+                    group.add(node);
+                }
+
+
+                function addRNode(obj, group) {
+                    var node = new Kinetic.Rect({
+                        x: obj.x,
+                        y: obj.y,
+                        width: 10,
+                        height: 10,
+                        fill: obj.color,
+                        id: obj.id,
+                        playCount: obj.playCount
+                    });
+
+                    node.on('click', function(evt) {
+                        var a = parseInt(document.getElementById('zoom').value) + 1;
+                        var link = window.location.href;
+                        link = link.split("?");
+                        getPlayCount(a,function() {
+                            window.location.href = link[0] + "?myField=" + a;
+                        });
+                    });
+                    group.add(node);
+                }
+
+
+                function buildNode(zoomLevel) {
+
+                    var data = [];
+                    var colors = ['red', 'orange', 'cyan', 'green', 'blue', 'purple'];
+                    var x;
+                    var y;
+                    var size;
+                    var div;
+                    var setColor;
+
+                    
+                     if (zoomLevel === 0) {
+                                x = 105;
+                                y = 70;
+                                size = 90;
+                                div = 5;
+                     }
+                     if (zoomLevel === 1) {
+                                x = 105;
+                                y = 75;
+                                size = 360;
+                                div = 10;
+                     }
+                     if (zoomLevel === 2) {
+                                x = 105;
+                                y = 75;
+                                size = 1440;
+                                div = 20;
+                     }
+                     if (zoomLevel === 3) {
+                                x = 110;
+                                y = 80;
+                                size = 5760;
+                                div = 40;
+                     }
+                     var x_temp = x;
+                     var idTemp = 0;
+                    for (var n = 0; n < playCount.length; n++) {
+                        for (var m = 0; m < playCount[0].length; m++) {
+                            idTemp = idTemp + 1;
+                            if (zoomLevel === 0) {
+                                if (playCount[n][m] <= 30) {
+                                    setColor = 'red';
+                                }
+                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                    setColor = 'orange';
+                                }
+                                if (playCount[n][m] > 70) {
+                                    setColor = 'green';
+                                }
+
+                            }
+                            if (zoomLevel === 1) {
+                                
+                                if (playCount[n][m] <= 30) {
+                                    setColor = colors[0];
+                                }
+                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                    setColor = colors[1];
+                                }
+                                if (playCount[n][m] > 70) {
+                                    setColor = colors[3];
+                                }
+                            }
+                            if (zoomLevel === 2) {
+                                
+                                if (playCount[n][m] <= 30) {
+                                    setColor = colors[0];
+                                }
+                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                    setColor = colors[1];
+                                }
+                                if (playCount[n][m] > 70) {
+                                    setColor = colors[3];
+                                }
+                            }
+                            if (zoomLevel === 3) {
+                                
+                                if (playCount[n][m] <= 30) {
+                                    setColor = colors[0];
+                                }
+                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                    setColor = colors[1];
+                                }
+                                if (playCount[n][m] > 70) {
+                                    setColor = colors[3];
+                                }
+                            }
+                            
+                            
+                            data.push({
+                                x: x_temp,
+                                y: y,
+                                id: idTemp,
+                                playCount: playCount[n][m],
+                                color: setColor
+                            });
+                            x_temp = x_temp + 20;
+                        }
+                        y = y + 20;
+                        x_temp = x;
+                    }
+                    //console.log("Play Count is: "+playCount)
+                    return data;
+                }
+
+
+
+                var bio;
+                var fflag = 0;
+                bio = new Kinetic.Shape({
+                    drawFunc: function(canvas) {
+                        var param1var = getQueryVariable("myField");
+                        document.getElementById('myField').value = param1var;
+                        var myFieldVal = document.getElementById('myField').value.toString();
+                        if (document.getElementById('myField').value === '' || myFieldVal === "undefined")
+                        {
+                            var context = canvas.getContext();
+                            var temp = canvas.getContext('2d');
+
+                            temp.clearRect(0, 0, 10 * stage.getWidth(), 10 * stage.getHeight());
+                            context.beginPath();
+                            context.moveTo(100, 100);
+                            context.bezierCurveTo(100, 0, 200, 0, 200, 100);
+                            context.lineTo(200, 400);
+                            context.bezierCurveTo(200, 500, 100, 500, 100, 400);
+                            context.closePath();
+                            canvas.fillStroke(this);
+                            var data;
+
+                            getPlayCount(-1, function() {
+                                data = buildNode(0);
+                                if (fflag === 0) {
+                                    for (var n = 0; n < data.length; n++) {
+                                        addRNode(data[n], group);
+
+                                    }
+
+                                    fflag = 1;
+                                }
+                            });
+
+                        } else {
+                            playCount = JSON.parse(sessionStorage.getItem("pcCount"));
+                            document.getElementById("zoom").value = document.getElementById('myField').value;
+                            drawFunction(parseInt(document.getElementById("zoom").value));
+                        }
+                    },
+                    fill: '#FFFFD0',
+                    stroke: 'black',
+                    strokeWidth: 4,
+                    draggable: false
+
+                });
+
+                function drawFunction(value) {
+                    var flag = 0;
+                    switch (value) {
+
+                        case 0:
+                            bio.remove();
+
+                            bio = new Kinetic.Shape({
+                                drawFunc: function(canvas) {
+                                    var context = canvas.getContext();
+                                    var temp = canvas.getContext('2d');
+
+                                    temp.clearRect(0, 0, canvas.width, canvas.height);
+                                    context.beginPath();
+
+                                    context.moveTo(100, 100);
+                                    context.bezierCurveTo(100, 0, 200, 0, 200, 100);
+                                    context.lineTo(200, 400);
+                                    context.bezierCurveTo(200, 500, 100, 500, 100, 400);
+                                    context.closePath();
+                                    canvas.fillStroke(this);
+                                    var data;
+                                    data = buildNode(0);
+                                    if (flag === 0) {
+                                        for (var n = 0; n < data.length; n++) {
+                                            addRNode(data[n], group);
+
+                                        }
+
+                                        flag = 1;
+                                    }
+
+                                },
+                                fill: '#FFFFD0',
+                                stroke: 'black',
+                                strokeWidth: 4
+
+                            });
+
+
+
+                            break;
+
+                        case 1:
+                            bio.remove();
+                            bio = new Kinetic.Shape({
+                                drawFunc: function(canvas) {
+                                    var context = canvas.getContext();
+                                    var temp = canvas.getContext('2d');
+
+                                    temp.clearRect(0, 0, canvas.width, canvas.height);
+
+                                    context.beginPath();
+                                    context.moveTo(95, 100);
+                                    context.bezierCurveTo(95, -50, 305, -50, 305, 100);
+                                    context.lineTo(305, 800);
+                                    context.bezierCurveTo(305, 950, 95, 950, 95, 800);
+                                    context.closePath();
+                                    canvas.fillStroke(this);
+                                    var data;
+                                    data = buildNode(1);
+                                    if (flag === 0) {
+                                        for (var n = 0; n < data.length; n++) {
+                                            addRNode(data[n], group);
+
+                                        }
+
+                                        flag = 1;
+                                    }
+
+                                },
+                                fill: '#FFFFD0',
+                                stroke: 'black',
+                                strokeWidth: 9
+                            });
+                            break;
+
+                        case 2:
+                            bio.remove();
+
+                            bio = new Kinetic.Shape({
+                                drawFunc: function(canvas) {
+                                    var context = canvas.getContext();
+                                    var temp = canvas.getContext('2d');
+
+                                    temp.clearRect(0, 0, canvas.width, canvas.height);
+
+                                    context.beginPath();
+                                    context.moveTo(90, 110);
+                                    context.bezierCurveTo(90, -100, 510, -100, 510, 110);
+                                    context.lineTo(510, 1500);
+                                    context.bezierCurveTo(510, 1700, 90, 1700, 90, 1500);
+                                    context.closePath();
+                                    canvas.fillStroke(this);
+                                    var data;
+                                    data = buildNode(2);
+                                    if (flag === 0) {
+                                        for (var n = 0; n < data.length; n++) {
+                                            addRNode(data[n], group);
+
+                                        }
+
+                                        flag = 1;
+                                    }
+                                },
+                                fill: '#FFFFD0',
+                                stroke: 'black',
+                                strokeWidth: 15
+                            });
+                            break;
+
+                        case 3:
+                            bio.remove();
+                            bio = new Kinetic.Shape({
+                                drawFunc: function(canvas) {
+                                    var context = canvas.getContext();
+                                    var temp = canvas.getContext('2d');
+
+                                    temp.clearRect(0, 0, canvas.width, canvas.height);
+
+                                    context.beginPath();
+                                    context.moveTo(80, 100);
+                                    context.bezierCurveTo(80, -200, 920, -200, 920, 100);
+                                    context.lineTo(920, 2950);
+                                    context.bezierCurveTo(920, 3200, 80, 3200, 80, 2950);
+                                    context.closePath();
+                                    canvas.fillStroke(this);
+                                    var data;
+                                    data = buildNode(3);
+                                    if (flag === 0) {
+                                        for (var n = 0; n < data.length; n++) {
+                                            addCNode(data[n], group);
+
+                                        }
+
+                                        flag = 1;
+                                    }
+                                },
+                                fill: '#FFFFD0',
+                                stroke: 'black',
+                                strokeWidth: 22
+                            });
+                            break;
+
+                    }
+                    group.add(bio);
+                    layer.add(group);
+
+                    // add the layer to the stage
+                    stage.add(layer);
+                }
+
+
+                group.add(bio);
+
+                layer.add(group);
+
+                stage.add(layer);
+                stage.add(tooltipLayer);
+
+                function getPlayCount(a, callback) {
+                    a = parseInt(a);
+                    var txt;
+                    if(a === -1)
+                      txt = document.getElementById('zoom').value;
+                    else
+                        txt = a;
+                    txt = Math.pow(2, txt);
+                    $.ajax({
+                        url: "phyloBackend.php",
+                        type: "post",
+                        data: {'zoomLevel': txt},
+                        dataType: "json",
+                        async: "false",
+                        success: function(result) {
+
+                            playCount = result;
+                            sessionStorage.setItem("pcCount", JSON.stringify(playCount));
+
+                            if (callback)
+                                callback();
+                        }
+                    });
+
+                }
+
+                $(document).ready(function() {
+                    playCount = JSON.parse(sessionStorage.getItem("pcCount"));
+
+
+
+                    $("#zoom").change(function() {
+
+                        document.getElementById('myField').value = $(this).val();
+                        $this = $(this);
+                        var txt = parseInt($(this).val());
+                        txt = Math.pow(2, txt);
+
+
+                        $.ajax({
+                            url: "phyloBackend.php",
+                            type: "post",
+                            data: {'zoomLevel': txt},
+                            dataType: "json",
+                            success: function(result) {
+
+                                playCount = result;
+
+                                sessionStorage.setItem("pcCount", JSON.stringify(playCount));
+                                var link = window.location.href;
+                                link = link.split("?");
+                                window.location.href = link[0] + "?myField=" + $this.val();
+                            }
+                        });
+
+
+
+
+
+                        //drawFunction(parseInt($(this).val()));
+                    });
+                });
+
+            </script>
+        </form>
+    </body>
+</html>
+
