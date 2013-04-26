@@ -106,6 +106,7 @@
                     });
 
                     node.on('click', function(evt) {
+                        
                         var a = parseInt(document.getElementById('zoom').value) + 1;
                         var link = window.location.href;
                         link = link.split("?");
@@ -158,10 +159,10 @@
                         for (var m = 0; m < playCount[0].length; m++) {
                             idTemp = idTemp + 1;
                             if (zoomLevel === 0) {
-                                if (playCount[n][m] <= 30) {
+                                if (playCount[n][m] <= 50) {
                                     setColor = 'red';
                                 }
-                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                if (playCount[n][m] > 50 && playCount[n][m] <= 70) {
                                     setColor = 'orange';
                                 }
                                 if (playCount[n][m] > 70) {
@@ -171,10 +172,10 @@
                             }
                             if (zoomLevel === 1) {
                                 
-                                if (playCount[n][m] <= 30) {
+                                if (playCount[n][m] <= 50) {
                                     setColor = colors[0];
                                 }
-                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                if (playCount[n][m] > 50 && playCount[n][m] <= 70) {
                                     setColor = colors[1];
                                 }
                                 if (playCount[n][m] > 70) {
@@ -183,10 +184,10 @@
                             }
                             if (zoomLevel === 2) {
                                 
-                                if (playCount[n][m] <= 30) {
+                                if (playCount[n][m] <= 50) {
                                     setColor = colors[0];
                                 }
-                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                if (playCount[n][m] > 50 && playCount[n][m] <= 70) {
                                     setColor = colors[1];
                                 }
                                 if (playCount[n][m] > 70) {
@@ -195,10 +196,10 @@
                             }
                             if (zoomLevel === 3) {
                                 
-                                if (playCount[n][m] <= 30) {
+                                if (playCount[n][m] <= 50) {
                                     setColor = colors[0];
                                 }
-                                if (playCount[n][m] > 30 && playCount[n][m] <= 70) {
+                                if (playCount[n][m] > 50 && playCount[n][m] <= 70) {
                                     setColor = colors[1];
                                 }
                                 if (playCount[n][m] > 70) {
@@ -283,7 +284,7 @@
                                 drawFunc: function(canvas) {
                                     var context = canvas.getContext();
                                     var temp = canvas.getContext('2d');
-
+                                    data = buildNode(0);
                                     temp.clearRect(0, 0, canvas.width, canvas.height);
                                     context.beginPath();
 
@@ -294,7 +295,7 @@
                                     context.closePath();
                                     canvas.fillStroke(this);
                                     var data;
-                                    data = buildNode(0);
+                                    
                                     if (flag === 0) {
                                         for (var n = 0; n < data.length; n++) {
                                             addRNode(data[n], group);
@@ -460,7 +461,16 @@
 
                 $(document).ready(function() {
                     playCount = JSON.parse(sessionStorage.getItem("pcCount"));
-
+                    var param1var = getQueryVariable("myField");
+                    if(param1var === undefined){
+                        var a = parseInt(document.getElementById('zoom').value);
+                        var link = window.location.href;
+                        link = link.split("?");
+                        getPlayCount(a,function() {
+                            window.location.href = link[0] + "?myField=" + a;
+                        });
+                        
+                    }
 
 
                     $("#zoom").change(function() {
